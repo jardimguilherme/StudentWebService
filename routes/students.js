@@ -20,8 +20,19 @@ router.get("/:id_student", (req, res, next) => {
 
 //insere um aluno
 router.post("/", (req, res, next) => {
+
+    const student = {
+        id: req.body.id,
+        rga: req.body.rga,
+        nome: req.body.name,
+        curso: req.body.curso,
+        situacao: req.body.situ,
+        registrado_em: req.body.registrado_em
+    };
+
   res.status(201).send({
     mensagem: "O aluno foi criado",
+    alunoCriado: student
   });
 });
 
