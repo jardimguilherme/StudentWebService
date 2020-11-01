@@ -81,6 +81,16 @@ router.post("/", (req, res, next) => {
   });
 });
 
+//trata o erro de post em student/id
+router.post("/:idAluno", (req, res, next) => {
+  mysql.getConnection((error, conn) => {
+    return res.status(405).send({
+      mensagem: "metodo nao permitido",
+      erro: 405,
+    });
+  });
+});
+
 //atualiza um aluno
 router.put("/:idAluno", (req, res, next) => {
   mysql.getConnection((error, conn) => {
@@ -118,10 +128,10 @@ router.put("/:idAluno", (req, res, next) => {
 //trata o erro de put em students/
 router.put("/", (req, res, next) => {
   mysql.getConnection((error, conn) => {
-      return res.status(405).send({
-        mensagem: "metodo nao permitido",
-        erro: 405,
-      });
+    return res.status(405).send({
+      mensagem: "metodo nao permitido",
+      erro: 405,
+    });
   });
 });
 
@@ -155,12 +165,12 @@ router.delete("/:idAluno", (req, res, next) => {
 
 //trata o erro de delete em students/
 router.delete("/", (req, res, next) => {
-    mysql.getConnection((error, conn) => {
-        return res.status(405).send({
-          mensagem: "metodo nao permitido",
-          erro: 405,
-        });
+  mysql.getConnection((error, conn) => {
+    return res.status(405).send({
+      mensagem: "metodo nao permitido",
+      erro: 405,
     });
   });
+});
 
 module.exports = router;
