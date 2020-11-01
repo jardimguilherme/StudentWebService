@@ -16,10 +16,11 @@ app.use((req, res, next) => {
     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
   );
 
-  if(req.method === 'OPTIONS')
-    res.header('Access-Control-Allow-Origin',
-    'PUT, POST, DELETE, GET');
+  if (req.method === "OPTIONS") {
+    res.header("Access-Control-Allow-Origin", "PUT, POST, DELETE, GET");
     return res.status(200).send({});
+  }
+  next();
 });
 
 app.use("/students", studentRouter);
