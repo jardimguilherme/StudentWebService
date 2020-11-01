@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const mysql = require("../mysql").pool;
+const getDate = require("get-date");
 
 //retorna todos os alunos
 router.get("/", (req, res, next) => {
@@ -91,7 +92,13 @@ router.put("/:idAluno", (req, res, next) => {
 
     conn.query(
       "UPDATE alunos SET rga = ?, nome = ?, curso = ?, situacao = ? WHERE idAluno = ?;",
-      [req.body.rga, req.body.nome, req.body.curso, req.body.situacao, req.body.idAluno],
+      [
+        req.body.rga,
+        req.body.nome,
+        req.body.curso,
+        req.body.situacao,
+        req.body.idAluno,
+      ],
       (error, resultado, fields) => {
         if (error) {
           return res.status(404).send({
@@ -101,39 +108,59 @@ router.put("/:idAluno", (req, res, next) => {
         }
         return res.status(200).send({
           mensagem: "Aluno alterado com sucesso",
-          response: resultado
+          response: resultado,
         });
       }
     );
   });
 });
 
+//trata o erro de put em students/
+router.put("/", (req, res, next) => {
+  mysql.getConnection((error, conn) => {
+      return res.status(405).send({
+        mensagem: "metodo nao permitido",
+        erro: 405,
+      });
+  });
+});
+
 //deleta um aluno
 router.delete("/:idAluno", (req, res, next) => {
-    mysql.getConnection((error, conn) => {
+  mysql.getConnection((error, conn) => {
+    if (error) {
+      return res.status(500).send({
+        error: error,
+      });
+    }
+
+    conn.query(
+      "DELETE FROM alunos WHERE idAluno = ?;",
+      [req.body.idAluno],
+      (error, resultado, fields) => {
         if (error) {
-          return res.status(500).send({
+          return res.status(404).send({
+            mensagem: "Aluno nao encontrado",
             error: error,
           });
         }
-    
-        conn.query(
-          "DELETE FROM alunos WHERE idAluno = ?;",
-          [req.body.idAluno],
-          (error, resultado, fields) => {
-            if (error) {
-              return res.status(404).send({
-                mensagem: "Aluno nao encontrado",
-                error: error,
-              });
-            }
-            return res.status(200).send({
-              mensagem: "Aluno removido com sucesso",
-              response: resultado,
-            });
-          }
-        );
-      });
+        return res.status(200).send({
+          mensagem: "Aluno removido com sucesso",
+          response: resultado,
+        });
+      }
+    );
+  });
 });
+
+//trata o erro de delete em students/
+router.delete("/", (req, res, next) => {
+    mysql.getConnection((error, conn) => {
+        return res.status(405).send({
+          mensagem: "metodo nao permitido",
+          erro: 405,
+        });
+    });
+  });
 
 module.exports = router;
