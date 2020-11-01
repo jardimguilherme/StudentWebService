@@ -11,23 +11,40 @@ router.get("/", (req, res, next) => {
       });
     }
 
-    conn.query(
-        "SELECT * FROM alunos;",
-        (error, resultado, fields) => {
-            if(error) { return res.status(500).send({ error: error })}
-            return res.status(200).send({ response: resultado })
-        }
-        );
+    conn.query("SELECT * FROM alunos;", (error, resultado, fields) => {
+      if (error) {
+        return res.status(400).send({
+          mensagem: "parametros invalidos",
+          error: error,
+        });
+      }
+      return res.status(200).send({ response: resultado });
+    });
   });
 });
 
 //retorna dados de um aluno
-router.get("/:id_student", (req, res, next) => {
-  const id = req.params.id_student;
+router.get("/:idAluno", (req, res, next) => {
+  mysql.getConnection((error, conn) => {
+    if (error) {
+      return res.status(500).send({
+        error: error,
+      });
+    }
 
-  res.status(200).send({
-    mensagem: "Retorna um aluno",
-    id: id,
+    conn.query(
+      "SELECT * FROM alunos WHERE idAluno = ?;",
+      [req.params.idAluno],
+      (error, resultado, fields) => {
+        if (error) {
+          return res.status(404).send({
+            mensagem: "Aluno nao encontrado",
+            error: error,
+          });
+        }
+        return res.status(200).send({ response: resultado });
+      }
+    );
   });
 });
 
@@ -47,7 +64,8 @@ router.post("/", (req, res, next) => {
         conn.release();
 
         if (error) {
-          return res.status(500).send({
+          return res.status(400).send({
+            mensagem: "Parametros invalidos",
             error: error,
             response: null,
           });
@@ -63,23 +81,59 @@ router.post("/", (req, res, next) => {
 });
 
 //atualiza um aluno
-router.put("/", (req, res, next) => {
-  const id = req.params.id_student;
+router.put("/:idAluno", (req, res, next) => {
+  mysql.getConnection((error, conn) => {
+    if (error) {
+      return res.status(500).send({
+        error: error,
+      });
+    }
 
-  res.status(200).send({
-    mensagem: "O aluno foi atualizado",
-    id: id,
+    conn.query(
+      "UPDATE alunos SET rga = ?, nome = ?, curso = ?, situacao = ? WHERE idAluno = ?;",
+      [req.body.rga, req.body.nome, req.body.curso, req.body.situacao, req.body.idAluno],
+      (error, resultado, fields) => {
+        if (error) {
+          return res.status(404).send({
+            mensagem: "Aluno nao encontrado",
+            error: error,
+          });
+        }
+        return res.status(200).send({
+          mensagem: "Aluno alterado com sucesso",
+          response: resultado
+        });
+      }
+    );
   });
 });
 
 //deleta um aluno
-router.delete("/", (req, res, next) => {
-  const id = req.params.id_student;
-
-  res.status(200).send({
-    mensagem: "O aluno foi excluído",
-    id: id,
-  });
+router.delete("/:idAluno", (req, res, next) => {
+    mysql.getConnection((error, conn) => {
+        if (error) {
+          return res.status(500).send({
+            error: error,
+          });
+        }
+    
+        conn.query(
+          "DELETE FROM alunos WHERE idAluno = ?;",
+          [req.body.idAluno],
+          (error, resultado, fields) => {
+            if (error) {
+              return res.status(404).send({
+                mensagem: "Aluno nao encontrado",
+                error: error,
+              });
+            }
+            return res.status(200).send({
+              mensagem: "Aluno removido com sucesso",
+              response: resultado,
+            });
+          }
+        );
+      });
 });
 
 module.exports = router;
